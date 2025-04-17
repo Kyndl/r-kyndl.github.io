@@ -1,52 +1,67 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="cs">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Encounter</title>
-  <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Náhodný Encounter</title>
+  <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
   <script src="game.js" defer></script>
 </head>
 <body>
-    <div id="main-container">
-      <div id="left-column">
-        <div id="map-container">
-          <h3>Mapa</h3>
-          <div id="map"></div>
+  <main id="main-container">
+    
+    <!-- Levý sloupec - Mapa -->
+    <aside id="left-column">
+      <section id="map-container">
+        <h2>Mapa</h2>
+        <div id="map"></div>
+      </section>
+    </aside>
+
+    <!-- Střední sloupec - Encounter + Staty -->
+    <section id="middle-column">
+      
+      <section class="encounter-scroll">
+        <h1>Náhodný Encounter</h1>
+        <p id="problem-text">Načítání encounteru...</p>
+        <div class="choices">
+          <button id="choice1">Možnost 1</button>
+          <button id="choice2">Možnost 2</button>
+          <button id="choice3">Možnost 3</button>
         </div>
-      </div>
-  
-      <div id="right-column">
-        <div class="scroll">
-          <h1>Nahodný Encounter</h1>
-          <p id="problem-text">Načítáni encounter...</p>
-          <div class="choices">
-            <button id="choice1"></button>
-            <button id="choice2"></button>
-            <button id="choice3"></button>
-          </div>
+      </section>
+
+      <section id="encounter-result">
+        <h3>Výsledek</h3>
+        <div id="outcome-text"></div>
+        <div id="choice-text"></div>
+        <div id="result"></div>
+        <div id="hp-display"></div>
+        <button id="back-button">Zpět</button>
+      </section>
+
+      <section id="bottom-bar">
+        <div id="stats-box">
+          <h3>Statistiky</h3>
+          <p>Síla: <span id="str-stat"></span></p>
+          <p>Houževnatost: <span id="dex-stat"></span></p>
+          <p>Inteligence: <span id="int-stat"></span></p>
+          <p>Zdraví: <span id="hp-stat">0</span></p>
         </div>
-  
-        <div id="encounter-result">
-          <h3>Výsledky encounter</h3>
-          <div id="outcome-text"></div>
-          <div id="choice-text"></div>
-          <div id="result"></div>
-        </div>
-      </div>
-    </div>
-  
-    <div id="bottom-bar">
-      <div id="stats-box">
-        <h3>Stats</h3>
-        <p>Síla: <span id="str-stat"></span></p>
-        <p>Houževnatost: <span id="dex-stat"></span></p>
-        <p>Inteligence: <span id="int-stat"></span></p>
-        <p>Zdravý: <span id="hp-stat"></span></p>
-      </div>
-      <button id="menu-button">Zpět do Menu</button>
-    </div>
-  </body>
-  
+        <button id="menu-button">Zpět do Menu</button>
+      </section>
+
+    </section>
+
+    <!-- Pravý sloupec - Inventář -->
+    <aside id="right-column">
+      <section id="inventory">
+        <h2>Inventář</h2>
+        <ul id="inventory-list"></ul>
+      </section>
+    </aside>
+
+  </main>
+</body>
 </html>

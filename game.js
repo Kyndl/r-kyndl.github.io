@@ -1,147 +1,227 @@
-document.addEventListener('DOMContentLoaded', function () {
-    const encounters = {
-        level1: [
-            {
-                name: "Zaječí mýtina",
-                text: "Na cestičce vás zastaví malý zajíc.",
-                choices: [
-                    { text: "Pohladit ho.", next: "outcome.html", stat: "dex" },
-                    { text: "Pokračovat v cestě.", next: "outcome.html", stat: "str" },
-                    { text: "Zkusit ho chytit.", next: "outcome.html", stat: "dex" }
-                ],
-                location: { x: 100, y: 50 }
-            },
-            {
-                name: "Starý strom",
-                text: "Na kraji lesa je starý strom.",
-                choices: [
-                    { text: "Prozkoumat strom.", next: "outcome.html", stat: "int" },
-                    { text: "Pokračovat dál.", next: "outcome.html", stat: "str" },
-                    { text: "Sklonit se a posbírat byliny.", next: "outcome.html", stat: "int" }
-                ],
-                location: { x: 200, y: 100 }
-            },
-            {
-                name: "Zřícenina",
-                text: "Přicházíte ke staré zřícenině.",
-                choices: [
-                    { text: "Prohledat vchod.", next: "outcome.html", stat: "int" },
-                    { text: "Zakřičet dovnitř.", next: "outcome.html", stat: "str" },
-                    { text: "Zapsat runy na zdi.", next: "outcome.html", stat: "dex" }
-                ],
-                location: { x: 320, y: 180 }
+// game.js
+
+document.addEventListener("DOMContentLoaded", function () {
+    // Define problems with a difficulty weight
+    const problems = [
+        {
+            text: "Před vámi je zborcený most. Musíte ho přeskočit nebo obejít.",
+            difficulty: 1, // Easy (success chance 100% for lower rolls)
+            choices: [
+                { text: "Přeskočit (Síla)", stat: "str" },
+                { text: "Obe jít (Houževnatost)", stat: "dex" },
+                { text: "Najít jinou cestu (Inteligence)", stat: "int" }
+            ]
+        },
+        {
+            text: "Stojíš před magickým zámkem, který blokuje dveře.",
+            difficulty: 2, // Medium
+            choices: [
+                { text: "Rozrazit dveře (Síla)", stat: "str" },
+                { text: "Obejít mechanismus (Houževnatost)", stat: "dex" },
+                { text: "Rozluštit kouzlo (Inteligence)", stat: "int" }
+            ]
+        },
+        {
+            text: "Byl jsi přepaden v temném lese.",
+            difficulty: 3, // Hard
+            choices: [
+                { text: "Bojuj (Síla)", stat: "str" },
+                { text: "Utíkej (Houževnatost)", stat: "dex" },
+                { text: "Oklam je (Inteligence)", stat: "int" }
+            ]
+        }
+    ];
+
+    // Load or initialize player stats
+    const playerStats = JSON.parse(localStorage.getItem("playerStats") || '{"str": 10, "dex": 10, "int": 10, "class": "warrior"}');
+    let currentHP = parseInt(localStorage.getItem("hp") || "10");
+    const maxHP = 15; // Store the initial maxHP for resetting
+
+    // Display stats
+    document.getElementById("str-stat").textContent = playerStats.str;
+    document.getElementById("dex-stat").textContent = playerStats.dex;
+    document.getElementById("int-stat").textContent = playerStats.int;
+    document.getElementById("hp-stat").textContent = currentHP;
+
+    // Pick a random problem based on difficulty weighting
+    const totalDifficulty = problems.reduce((sum, problem) => sum + problem.difficulty, 0);
+    let randomValue = Math.random() * totalDifficulty;
+    let selectedProblem = null;
+    for (let problem of problems) {
+        randomValue -= problem.difficulty;
+        if (randomValue <= 0) {
+            selectedProblem = problem;
+            break;
+        }
+    }
+
+    // Display selected problem
+    document.getElementById("problem-text").textContent = selectedProblem.text;
+
+    // Assign choices for the selected problem
+    const buttons = [document.getElementById("choice1"), document.getElementById("choice2"), document.getElementById("choice3")];
+    selectedProblem.choices.forEach((choice, index) => {
+        const btn = buttons[index];
+        btn.textContent = choice.text;
+        btn.onclick = function () {
+            const d20 = Math.floor(Math.random() * 20) + 1;
+            const total = d20 + playerStats[choice.stat];
+
+            // Store choices and results in localStorage
+            localStorage.setItem("choice", choice.text);
+            localStorage.setItem("stat", choice.stat);
+            localStorage.setItem("result", JSON.stringify({ d20, total }));
+
+            // Reset HP and disable inputs if health is zero
+// Inside your choice button click event:
+if (currentHP <= 0) {
+    // Reset HP to maxHP (or adjust as needed)
+    currentHP = maxHP;
+    document.getElementById("hp-display").textContent = `Aktuální životy: ${currentHP}`; // Update HP display
+
+    // Save updated health back to localStorage
+    localStorage.setItem("hp", currentHP);
+
+    // Disable all user inputs
+    const inputs = document.querySelectorAll('button, input, textarea, select');
+    inputs.forEach(input => {
+        input.disabled = true;
+    });
+
+    // Redirect to index.html after 3 seconds
+    setTimeout(() => {
+        location.href = "index.html";
+    }, 3000);
+} else {
+    // Continue with the outcome logic as usual
+    // Adjust HP based on result
+    let outcomeText = '';
+    let resultText = '';
+    let additionalInfo = '';
+    if (total >= 18) {
+        outcomeText = "Perfektní úspěch!";
+        resultText = `Získali jste předmět a postupujete dál.`;
+        additionalInfo = rewardItem;  // Assuming 'rewardItem' is predefined elsewhere
+    } else if (total >= 15) {
+        outcomeText = "Úspěch!";
+        resultText = `Pokročili jste dál.`;
+    } else if (total >= 4) {
+        outcomeText = "Úspěch, ale s následky.";
+        resultText = `Vezmete poškození.`;
+        additionalInfo = "Poškození: 5 HP.";
+        currentHP -= 5; // Subtract 5 HP on success with consequences
+    } else {
+        outcomeText = "Neúspěch!";
+        resultText = `Nepodařilo se vám to. Zemřeli jste!`;
+        additionalInfo = "Hráč umírá a končí hru.";
+        currentHP = 0; // Player dies
+    }
+
+    // Update the outcome display
+    document.getElementById("outcome-text").textContent = outcomeText;
+    document.getElementById("result").innerHTML = `...`; // Updated HTML for result
+
+    // Update health display
+    document.getElementById("hp-display").textContent = `Aktuální životy: ${currentHP}`;
+
+    // Save updated health back to localStorage
+    localStorage.setItem("hp", currentHP);
+}
+
+
+            // Adjust HP based on result
+            let outcomeText = '';
+            let resultText = '';
+            let additionalInfo = '';
+            if (total >= 18) {
+                outcomeText = "Perfektní úspěch!";
+                resultText = `Získali jste předmět a postupujete dál.`;
+                // Assuming 'rewardItem' is predefined elsewhere
+                additionalInfo = rewardItem;
+            } else if (total >= 15) {
+                outcomeText = "Úspěch!";
+                resultText = `Pokročili jste dál.`;
+            } else if (total >= 4) {
+                outcomeText = "Úspěch, ale s následky.";
+                resultText = `Vezmete poškození.`;
+                additionalInfo = "Poškození: 5 HP.";
+                currentHP -= 5; // Subtract 5 HP on success with consequences
+            } else {
+                outcomeText = "Neúspěch!";
+                resultText = `Nepodařilo se vám to. Zemřeli jste!`;
+                additionalInfo = "Hráč umírá a končí hru.";
+                currentHP = 0; // Player dies, health is 0
+                document.getElementById("menu-button").disabled = true; // Disable menu button until game ends
+                setTimeout(() => {
+                    location.href = "index.html";
+                }, 3000); // Redirect to index.html after 3 seconds
             }
-        ]
-    };
 
-    const playerClass = {
-        warrior: 5,
-        rogue: 3,
-        mage: 2
-    };
+            // Update the outcome display
+            document.getElementById("outcome-text").textContent = outcomeText;
+            document.getElementById("choice-text").textContent = `Volba: ${choice.text}`;
+            document.getElementById("result").innerHTML = `
+                <p>D20: ${d20} + ${playerStats[choice.stat]} (Stat) = ${total}</p>
+                <p>${resultText}</p>
+                <p>${additionalInfo}</p>
+            `;
 
-    const stats = JSON.parse(localStorage.getItem("playerStats") || '{"str": 10, "dex": 10, "int": 10, "class": "warrior", "hp": 15, "level": 1, "xp": 0, "inventory": []}');
-    let level = stats.level || 1;
-    const classModifier = playerClass[stats.class] || 0;
-    const hp = stats.hp || (10 + classModifier + level);
+            // Update health display
+            document.getElementById("hp-display").textContent = `Aktuální životy: ${currentHP}`;
 
-    let inEncounter = false;
+            // Save updated health back to localStorage
+            localStorage.setItem("hp", currentHP);
 
-    function initMap() {
-        const map = document.getElementById("map");
-        map.innerHTML = ""; // clear previous map if any
+            // Inventory functions
+            function getInventory() {
+                return JSON.parse(localStorage.getItem("inventory")) || [];
+            }
 
-        encounters.level1.forEach((encounter, index) => {
-            // Create location dot
-            const locationDot = document.createElement("div");
-            locationDot.classList.add("location");
-            locationDot.style.left = `${encounter.location.x}px`;
-            locationDot.style.top = `${encounter.location.y}px`;
-            locationDot.onclick = () => {
-                if (!inEncounter) triggerEncounter(encounter);
+            function saveInventory(inventory) {
+                localStorage.setItem("inventory", JSON.stringify(inventory));
+            }
+
+            function addItemToInventory(item) {
+                const inventory = getInventory();
+                inventory.push(item);
+                saveInventory(inventory);
+                updateInventoryDisplay();
+            }
+
+            function updateInventoryDisplay() {
+                const inventoryList = document.getElementById("inventory-list");
+                if (!inventoryList) return;
+
+                const inventory = getInventory();
+                inventoryList.innerHTML = "";
+
+                if (inventory.length === 0) {
+                    inventoryList.innerHTML = "<li>Prázdný</li>";
+                    return;
+                }
+
+                inventory.forEach(item => {
+                    const li = document.createElement("li");
+                    li.textContent = item;
+                    inventoryList.appendChild(li);
+                });
+            }
+
+            // Clear stored values after outcome
+            localStorage.removeItem("choice");
+            localStorage.removeItem("stat");
+            localStorage.removeItem("result");
+
+            // Back button logic
+            document.getElementById("back-button").onclick = function () {
+                // Return to the encounter page
+                location.href = "encounter.html";
             };
+        };
+    });
 
-            // Create label
-            const label = document.createElement("div");
-            label.classList.add("location-label");
-            label.style.left = `${encounter.location.x - 20}px`;
-            label.style.top = `${encounter.location.y - 25}px`;
-            label.textContent = encounter.name;
-
-            map.appendChild(locationDot);
-            map.appendChild(label);
-        });
-    }
-
-    function triggerEncounter(encounter) {
-        inEncounter = true;
-
-        document.getElementById("problem-text").textContent = encounter.text;
-        document.getElementById("choice1").textContent = encounter.choices[0].text;
-        document.getElementById("choice2").textContent = encounter.choices[1].text;
-        document.getElementById("choice3").textContent = encounter.choices[2].text;
-
-        document.getElementById("choice1").onclick = () => handleChoice(encounter.choices[0]);
-        document.getElementById("choice2").onclick = () => handleChoice(encounter.choices[1]);
-        document.getElementById("choice3").onclick = () => handleChoice(encounter.choices[2]);
-
-        updateMap(encounter.location);
-    }
-
-    function handleChoice(choice) {
-        const { stat, next } = choice;
-        const result = rollDice(stat);
-
-        localStorage.setItem("choice", choice.text);
-        localStorage.setItem("stat", stat);
-        localStorage.setItem("result", JSON.stringify(result));
-        localStorage.setItem("hp", stats.hp);
-        localStorage.setItem("playerStats", JSON.stringify(stats));
-
-        location.href = next;
-    }
-
-    function rollDice(stat) {
-        const d20 = Math.floor(Math.random() * 20) + 1;
-        const total = d20 + stats[stat];
-        return { d20, total };
-    }
-
-    function updateMap(location) {
-        const map = document.getElementById("map");
-
-        const playerMarker = document.createElement("div");
-        playerMarker.classList.add("location", "player-marker");
-        playerMarker.style.left = `${location.x}px`;
-        playerMarker.style.top = `${location.y}px`;
-
-        map.appendChild(playerMarker);
-    }
-
-    initMap();
-
-    document.getElementById("stats-box").innerHTML = `
-        <h3>Vaše statistiky</h3>
-        <p>Síla: ${stats.str}</p>
-        <p>Obratnost: ${stats.dex}</p>
-        <p>Inteligence: ${stats.int}</p>
-        <p>Úroveň: ${level}</p>
-        <p>Životy: ${hp}</p>
-    `;
+    // Optional: Menu button
+    document.getElementById("menu-button").onclick = function () {
+        window.location.href = "index.html";
+    };
 });
-
-document.getElementById("menu-button").onclick = () => location.href = "index.html";
-
-// CSS adjuster
-window.onload = function() {
-    var cssPath = "standard.css";  // Default CSS
-    if (navigator.platform.includes("iPad")) {
-        cssPath = "iPad.css";  // Load iPad-specific CSS
-    }
-    
-    var fileref = document.createElement("link");
-    fileref.setAttribute("rel", "stylesheet");
-    fileref.setAttribute("type", "text/css");
-    fileref.setAttribute("href", cssPath);
-    document.getElementsByTagName("head")[0].appendChild(fileref);
-};
