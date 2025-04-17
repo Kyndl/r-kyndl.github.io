@@ -1,189 +1,232 @@
-/* Root Variables for Theme Colors */
-:root {
-    --bg-color: #f0f2f5;
-    --text-color: #333;
-    --heading-color: #444;
-    --container-bg: #fff;
-    --link-color: #7000a3;
-    --link-hover: #7000a3;
-    --footer-color: #aaa;
-    --border-radius: 10px;
-    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-    --font-size-base: 1rem;
-    --font-size-heading: 1.5rem;
-    --font-size-small: 0.9rem;
-    --line-height: 1.8;
-}
-
-/* Dark Theme Overrides */
-.dark-theme {
-    --bg-color: #000;
-    --text-color: #fff;
-    --heading-color: #ddd;
-    --container-bg: #1e1e1e;
-    --link-color: #7000a3;
-    --link-hover: #7000a3;
-    --footer-color: #777;
-}
-
-/* Reset and Base Styles */
-* {
+/* ==== Základní nastavení ==== */
+body {
+    background-image: url('https://www.transparenttextures.com/patterns/wood-pattern.png');
+    background-color: #f4e1d2;
+    font-family: 'MedievalSharp', sans-serif;
     margin: 0;
     padding: 0;
+    color: #4e3629;
+}
+
+/* ==== Rozvržení hlavních částí ==== */
+#main-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: flex-start;
+    gap: 30px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
     box-sizing: border-box;
 }
 
-body {
-    font-family: var(--font-family);
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 2rem;
-    transition: background-color 0.3s, color 0.3s; /* Smooth theme transition */
+#left-column,
+#right-column {
+    flex: 1;
+    max-width: 30%;
 }
 
-/* Container Styles */
-.container {
-    max-width: 800px;
+#bottom-bar {
     width: 100%;
-    background-color: var(--container-bg);
-    padding: 2rem;
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
+    max-width: 1200px;
+    margin: 20px auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* ==== Scroll (Encounter Box) ==== */
+.scroll {
+    background: url('https://www.transparenttextures.com/patterns/wood-pattern.png');
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+    animation: fadeIn 1s ease-in-out;
+}
+
+h1 {
+    text-align: center;
+    font-size: 2.5rem;
+    text-transform: uppercase;
+    color: #2d1f00;
+    margin-bottom: 20px;
+}
+
+#problem-text {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    margin-bottom: 20px;
     text-align: center;
 }
 
-/* Header Styles */
-header h1 {
-    margin-bottom: 1.5rem;
-    color: var(--text-color);
-}
-
-/* Main Content Styles */
-main {
-    text-align: left;
-}
-
-main h2 {
-    color: var(--heading-color);
-    margin-top: 1.5rem;
-    font-size: var(--font-size-heading);
-}
-
-main p,
-main ul,
-main li {
-    color: var(--text-color);
-    font-size: var(--font-size-base);
-    line-height: var(--line-height);
-}
-
-/* Footer Styles */
-footer {
-    margin-top: 2rem;
-    font-size: var(--font-size-small);
-    color: var(--footer-color);
-}
-
-/* Theme Button Styles */
-.themeSelector {
-    position: fixed;
-    top: 25px;
-    right: 25px;
+/* ==== Výběr Možností ==== */
+.choices {
     display: flex;
-    gap: 10px;
-    background-color: var(--container-bg);
-    padding: 1rem;
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
+    flex-direction: column;
+    align-items: center;
 }
 
-.themeButton {
-    padding: 0.75rem 1.5rem;
-    font-size: 1.2rem;
+button {
+    background-color: #8a5c2b;
+    color: #fff;
     border: none;
-    background-color: var(--link-color);
-    color: var(--container-bg);
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    margin: 5px;
+    border-radius: 10px;
     cursor: pointer;
-    transition: background-color 0.2s, color 0.2s;
-    border-radius: var(--border-radius);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    width: 80%;
+    max-width: 250px;
 }
 
-.themeButton:hover {
-    background-color: var(--link-hover);
-    color: var(--text-color);
+button:hover {
+    background-color: #6d4f2f;
+    transform: scale(1.05);
 }
 
-/* Navigation Styles */
-.navigation {
-    position: fixed;
-    top: 125px;
-    right: 25px;
-    background-color: var(--container-bg);
-    color: var(--text-color);
-    padding: 2.5rem;
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
+button:active {
+    background-color: #4e3629;
+}
+
+/* ==== Výsledky Encounteru ==== */
+#encounter-result {
+    background-color: rgba(255, 255, 240, 0.85);
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #0002;
+}
+
+#encounter-result h3 {
+    margin-top: 0;
+}
+
+#result,
+#outcome-text,
+#choice-text {
+    margin-top: 10px;
+}
+
+/* ==== Staty ==== */
+#stats-box {
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    margin-top: 10px;
+    width: 100%;
+}
+
+#stats-box h3 {
     font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+#stats-box p {
+    font-size: 1rem;
+    margin: 5px 0;
+}
+
+#stats-box ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+#stats-box ul li {
+    font-size: 1rem;
+    padding: 2px 0;
+    font-style: italic;
+    color: #b5864d;
+}
+
+#stats-box ul li::before {
+    content: "🛒 ";
+    color: #8a5c2b;
+}
+
+/* ==== Mapa ==== */
+#map-container {
+    border: 4px solid #8B5E3C;
+    background: url('parchment.jpg') center/cover no-repeat;
+    padding: 20px;
+    width: 100%;
+    height: 300px;
+    position: relative;
+    box-shadow: 0 0 20px #0004;
+    border-radius: 15px;
+}
+
+#map {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.location {
+    width: 14px;
+    height: 14px;
+    background-color: red;
+    border-radius: 50%;
+    position: absolute;
     cursor: pointer;
-    transition: background-color 0.2s;
+    z-index: 2;
 }
 
-/* Responsive Styles */
-@media (max-width: 1024px) {
-    body {
-        padding: 1rem;
-    }
+.player-marker {
+    background-color: green;
+}
 
-    .container {
-        padding: 1.5rem;
-    }
+.location-label {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: 'MedievalSharp', cursive;
+    color: #333;
+    pointer-events: none;
+    z-index: 1;
+}
 
-    .themeSelector,
-    .navigation {
-        font-size: 1.1rem;
-        padding: 1.5rem;
+/* ==== Tlačítko Zpět ==== */
+#back-button {
+    margin-top: 15px;
+    background-color: #6d4f2f;
+    font-size: 1.1rem;
+    padding: 8px 16px;
+}
+
+/* ==== Animace ==== */
+@keyframes fadeIn {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
     }
 }
 
-@media (max-width: 768px) {
-    main h2 {
-        font-size: 1.3rem;
-    }
-
-    main p,
-    main ul,
-    main li {
-        font-size: 0.9rem;
-    }
-
-    .themeSelector,
-    .navigation {
-        font-size: 1rem;
-    }
-}
-
-@media (max-width: 480px) {
-    main h2 {
-        font-size: 1.1rem;
-    }
-
-    main p,
-    main ul,
-    main li {
-        font-size: 0.8rem;
-    }
-
-    .themeButton,
-    .navigation {
-        position: static;
-        margin-top: 1rem;
-        display: block;
-        width: 100%;
-        text-align: center;
-    }
-}
+#menu-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 10px 15px;
+    font-size: 16px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    z-index: 1000;
+  }
+  
+  #menu-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  

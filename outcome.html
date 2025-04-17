@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <title>Výsledek</title>
+</head>
+<body>
+    <h2>Výsledek</h2>
+    <div id="outcome-text"></div>
+    <div id="choice-text"></div>
+    <div id="result"></div>
+    <div id="hp-display"></div>
+    <button id="back-button">Zpět na setkání</button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const stats = JSON.parse(localStorage.getItem("playerStats") || '{"str": 10, "dex": 10, "int": 10, "class": "warrior"}');
+            const choice = localStorage.getItem("choice");
+            const stat = localStorage.getItem("stat");
+            const result = JSON.parse(localStorage.getItem("result"));
+            let hp = parseInt(localStorage.getItem("hp") || 10); // Default to 10 if not set
+
+            // Handle the outcome and update health
+            let outcomeText = '';
+            let resultText = '';
+            let additionalInfo = '';
+
+            // Outcome based on dice result
+            if (result.total >= 18) {
+                outcomeText = "Perfektní úspěch!";
+                resultText = `Získali jste předmět a postupujete dál.`;
+                additionalInfo = "Předmět: Kouzelný amulet.";
+            } else if (result.total >= 15) {
+                outcomeText = "Úspěch!";
+                resultText = `Pokročili jste dál.`;
+            } else if (result.total >= 4) {
+                outcomeText = "Úspěch, ale s následky.";
+                resultText = `Vezmete poškození.`;
+                additionalInfo = "Poškození: 5 HP.";
+                hp -= 5; // Subtract 5 HP on success with consequences
+            } else {
+                outcomeText = "Neúspěch!";
+                document.getElementById("back-button").disabled = true;
+                resultText = `Nepodařilo se vám to. Zemřeli jste!`;
+                additionalInfo = "Hráč umírá a končí hru.";
+                setTimeout(() => {
+                    location.href = "index.html";
+                }, 3000); // Redirect to index.html after 3 seconds
+                hp = 0; // Player dies, health is 0
+            }
+            if (hp < 0) {
+                hp = 0; // Ensure health doesn't go below 0
+            }
+
+            // Update the outcome text
+            document.getElementById("outcome-text").textContent = outcomeText;
+            document.getElementById("choice-text").textContent = `Volba: ${choice}`;
+            document.getElementById("result").innerHTML = ` 
+                <p>D20: ${result.d20} + ${stats[stat]} (Stat) = ${result.total}</p>
+                <p>${resultText}</p>
+                <p>${additionalInfo}</p>
+            `;
+
+            // Update health display
+            document.getElementById("hp-display").textContent = `Aktuální životy: ${hp}`;
+
+            // Save updated health back to localStorage
+            localStorage.setItem("hp", hp);
+
+            // Clear the stored values after outcome
+            localStorage.removeItem("choice");
+            localStorage.removeItem("stat");
+            localStorage.removeItem("result");
+
+            // Back button logic
+            document.getElementById("back-button").onclick = function () {
+                // Return to the encounter page
+                location.href = "encounter.html";
+            };
+        });
+    </script>
+</body>
+</html>

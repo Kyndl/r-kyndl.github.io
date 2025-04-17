@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Encounter</title>
+  <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="game.js" defer></script>
+</head>
+<body>
+    <div id="main-container">
+      <div id="left-column">
+        <div id="map-container">
+          <h3>Mapa</h3>
+          <div id="map"></div>
+        </div>
+      </div>
+  
+      <div id="right-column">
+        <div class="scroll">
+          <h1>Nahodný Encounter</h1>
+          <p id="problem-text">Načítáni encounter...</p>
+          <div class="choices">
+            <button id="choice1"></button>
+            <button id="choice2"></button>
+            <button id="choice3"></button>
+          </div>
+        </div>
+  
+        <div id="encounter-result">
+          <h3>Výsledky encounter</h3>
+          <div id="outcome-text"></div>
+          <div id="choice-text"></div>
+          <div id="result"></div>
+        </div>
+      </div>
+    </div>
+  
+    <div id="bottom-bar">
+      <div id="stats-box">
+        <h3>Stats</h3>
+        <p>Síla: <span id="str-stat"></span></p>
+        <p>Houževnatost: <span id="dex-stat"></span></p>
+        <p>Inteligence: <span id="int-stat"></span></p>
+        <p>Zdravý: <span id="hp-stat"></span></p>
+      </div>
+      <button id="menu-button">Zpět do Menu</button>
+    </div>
+  </body>
+  
+</html>
