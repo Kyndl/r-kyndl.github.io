@@ -31,7 +31,12 @@ body {
     height: 200px;
     border: 2px dashed #888;
     background-color: #eee;
+    background-image: url("map.png");
+    background-size: cover; /* or set exact size, like '100% 100%' */
+    background-position: center;
+    background-repeat: no-repeat;
   }
+  
   
   button {
     font-family: inherit;
