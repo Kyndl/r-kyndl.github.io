@@ -1,11 +1,51 @@
-// game.js
-
 document.addEventListener("DOMContentLoaded", function () {
-    // Define problems with a difficulty weight
+    // ===============================
+    // === CLASS SELECTION SECTION ===
+    // ===============================
+    const baseStats = {
+        warrior: { str: 8, dex: 4, int: 2, hp: 16 },
+        rogue: { str: 5, dex: 8, int: 5, hp: 12 },
+        mage: { str: 4, dex: 6, int: 8, hp: 12 }
+    };
+
+    const chooseWarrior = document.getElementById("chooseWarrior");
+    const chooseRogue = document.getElementById("chooseRogue");
+    const chooseMage = document.getElementById("chooseMage");
+
+    if (chooseWarrior && chooseRogue && chooseMage) {
+        chooseWarrior.addEventListener("click", function () {
+            chooseClass("warrior");
+        });
+
+        chooseRogue.addEventListener("click", function () {
+            chooseClass("rogue");
+        });
+
+        chooseMage.addEventListener("click", function () {
+            chooseClass("mage");
+        });
+    }
+
+    function chooseClass(className) {
+        const stats = baseStats[className];
+        localStorage.setItem("playerStats", JSON.stringify({
+            str: stats.str,
+            dex: stats.dex,
+            int: stats.int,
+            class: className
+        }));
+        localStorage.setItem("hp", stats.hp);
+        localStorage.setItem("inventory", JSON.stringify([]));
+        window.location.href = 'encounter.html';
+    }
+
+    // ===============================
+    // ====== ENCOUNTER SECTION ======
+    // ===============================
     const problems = [
         {
             text: "Před vámi je zborcený most. Musíte ho přeskočit nebo obejít.",
-            difficulty: 1, // Easy (success chance 100% for lower rolls)
+            difficulty: 1,
             choices: [
                 { text: "Přeskočit (Síla)", stat: "str" },
                 { text: "Obe jít (Houževnatost)", stat: "dex" },
@@ -14,7 +54,7 @@ document.addEventListener("DOMContentLoaded", function () {
         },
         {
             text: "Stojíš před magickým zámkem, který blokuje dveře.",
-            difficulty: 2, // Medium
+            difficulty: 2,
             choices: [
                 { text: "Rozrazit dveře (Síla)", stat: "str" },
                 { text: "Obejít mechanismus (Houževnatost)", stat: "dex" },
@@ -23,7 +63,7 @@ document.addEventListener("DOMContentLoaded", function () {
         },
         {
             text: "Byl jsi přepaden v temném lese.",
-            difficulty: 3, // Hard
+            difficulty: 3,
             choices: [
                 { text: "Bojuj (Síla)", stat: "str" },
                 { text: "Utíkej (Houževnatost)", stat: "dex" },
@@ -32,19 +72,27 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     ];
 
-    // Load or initialize player stats
-    const playerStats = JSON.parse(localStorage.getItem("playerStats") || '{"str": 10, "dex": 10, "int": 10, "class": "warrior"}');
-    let currentHP = parseInt(localStorage.getItem("hp") || "10");
-    const maxHP = 15; // Store the initial maxHP for resetting
+    const playerStats = JSON.parse(localStorage.getItem("playerStats") || '{}');
+    let currentHP = parseInt(localStorage.getItem("hp") || "0");
 
-    // Display stats
-    document.getElementById("str-stat").textContent = playerStats.str;
-    document.getElementById("dex-stat").textContent = playerStats.dex;
-    document.getElementById("int-stat").textContent = playerStats.int;
-    document.getElementById("hp-stat").textContent = currentHP;
+    if (!playerStats || !playerStats.str) {
+        window.location.href = "index.html"; // fallback pokud chybí data
+        return;
+    }
 
-    // Pick a random problem based on difficulty weighting
-    const totalDifficulty = problems.reduce((sum, problem) => sum + problem.difficulty, 0);
+    // show player stats
+    const strStat = document.getElementById("str-stat");
+    const dexStat = document.getElementById("dex-stat");
+    const intStat = document.getElementById("int-stat");
+    const hpStat = document.getElementById("hp-stat");
+
+    if (strStat) strStat.textContent = playerStats.str;
+    if (dexStat) dexStat.textContent = playerStats.dex;
+    if (intStat) intStat.textContent = playerStats.int;
+    if (hpStat) hpStat.textContent = currentHP;
+
+    // randomly select a problem based on difficulty
+    const totalDifficulty = problems.reduce((sum, p) => sum + p.difficulty, 0);
     let randomValue = Math.random() * totalDifficulty;
     let selectedProblem = null;
     for (let problem of problems) {
@@ -55,173 +103,140 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Display selected problem
-    document.getElementById("problem-text").textContent = selectedProblem.text;
-
-    // Assign choices for the selected problem
-    const buttons = [document.getElementById("choice1"), document.getElementById("choice2"), document.getElementById("choice3")];
-    selectedProblem.choices.forEach((choice, index) => {
-        const btn = buttons[index];
-        btn.textContent = choice.text;
-        btn.onclick = function () {
-            const d20 = Math.floor(Math.random() * 20) + 1;
-            const total = d20 + playerStats[choice.stat];
-
-            // Store choices and results in localStorage
-            localStorage.setItem("choice", choice.text);
-            localStorage.setItem("stat", choice.stat);
-            localStorage.setItem("result", JSON.stringify({ d20, total }));
-
-            // Reset HP and disable inputs if health is zero
-// Inside your choice button click event:
-if (currentHP <= 0) {
-    // Reset HP to maxHP (or adjust as needed)
-    currentHP = maxHP;
-    document.getElementById("hp-display").textContent = `Aktuální životy: ${currentHP}`; // Update HP display
-
-    // Save updated health back to localStorage
-    localStorage.setItem("hp", currentHP);
-
-    // Disable all user inputs
-    const inputs = document.querySelectorAll('button, input, textarea, select');
-    inputs.forEach(input => {
-        input.disabled = true;
-    });
-
-    // Redirect to index.html after 3 seconds
-    setTimeout(() => {
-        location.href = "index.html";
-    }, 3000);
-} else {
-    // Continue with the outcome logic as usual
-    // Adjust HP based on result
-    let outcomeText = '';
-    let resultText = '';
-    let additionalInfo = '';
-    if (total >= 18) {
-        outcomeText = "Perfektní úspěch!";
-        resultText = `Získali jste předmět a postupujete dál.`;
-        additionalInfo = rewardItem;  // Assuming 'rewardItem' is predefined elsewhere
-    } else if (total >= 15) {
-        outcomeText = "Úspěch!";
-        resultText = `Pokročili jste dál.`;
-    } else if (total >= 4) {
-        outcomeText = "Úspěch, ale s následky.";
-        resultText = `Vezmete poškození.`;
-        additionalInfo = "Poškození: 5 HP.";
-        currentHP -= 5; // Subtract 5 HP on success with consequences
-    } else {
-        outcomeText = "Neúspěch!";
-        resultText = `Nepodařilo se vám to. Zemřeli jste!`;
-        additionalInfo = "Hráč umírá a končí hru.";
-        currentHP = 0; // Player dies
+    if (selectedProblem) {
+        document.getElementById("problem-text").textContent = selectedProblem.text;
+        const buttons = [document.getElementById("choice1"), document.getElementById("choice2"), document.getElementById("choice3")];
+        selectedProblem.choices.forEach((choice, index) => {
+            const btn = buttons[index];
+            btn.textContent = choice.text;
+            btn.onclick = function () {
+                handleChoice(choice);
+            };
+        });
     }
 
-    // Update the outcome display
-    document.getElementById("outcome-text").textContent = outcomeText;
-    document.getElementById("result").innerHTML = `...`; // Updated HTML for result
+    // result display
+    function handleChoice(choice) {
+        if (currentHP <= 0) return;
 
-    // Update health display
-    document.getElementById("hp-display").textContent = `Aktuální životy: ${currentHP}`;
+        const d20 = Math.floor(Math.random() * 20) + 1;
+        const total = d20 + playerStats[choice.stat];
 
-    // Save updated health back to localStorage
-    localStorage.setItem("hp", currentHP);
-}
+        localStorage.setItem("choice", choice.text);
+        localStorage.setItem("stat", choice.stat);
+        localStorage.setItem("result", JSON.stringify({ d20, total }));
 
+        let outcomeText = '';
+        let resultText = '';
+        let additionalInfo = '';
 
-            // Adjust HP based on result
-            let outcomeText = '';
-            let resultText = '';
-            let additionalInfo = '';
-            if (total >= 18) {
-                outcomeText = "Perfektní úspěch!";
-                resultText = `Získali jste předmět a postupujete dál.`;
-                // Assuming 'rewardItem' is predefined elsewhere
-                additionalInfo = rewardItem;
-            } else if (total >= 15) {
-                outcomeText = "Úspěch!";
-                resultText = `Pokročili jste dál.`;
-            } else if (total >= 4) {
-                outcomeText = "Úspěch, ale s následky.";
-                resultText = `Vezmete poškození.`;
-                additionalInfo = "Poškození: 5 HP.";
-                currentHP -= 5; // Subtract 5 HP on success with consequences
-            } else {
-                outcomeText = "Neúspěch!";
-                resultText = `Nepodařilo se vám to. Zemřeli jste!`;
-                additionalInfo = "Hráč umírá a končí hru.";
-                currentHP = 0; // Player dies, health is 0
-                document.getElementById("menu-button").disabled = true; // Disable menu button until game ends
-                setTimeout(() => {
-                    location.href = "index.html";
-                }, 3000); // Redirect to index.html after 3 seconds
-            }
+        if (total >= 18) {
+            outcomeText = "Perfektní úspěch!";
+            resultText = "Získali jste předmět a postupujete dál.";
+            const newItem = getRandomItem(); // <-- nový řádek
+            addItemToInventory(newItem);     // <-- místo pevného "Tajemný artefakt"
+        } else if (total >= 15) {
+            outcomeText = "Úspěch!";
+            resultText = "Pokročili jste dál.";
+        } else if (total >= 4) {
+            outcomeText = "Úspěch, ale s následky.";
+            resultText = "Vezmete poškození.";
+            additionalInfo = "Poškození: 5 HP.";
+            currentHP -= 5;
+        } else {
+            outcomeText = "Neúspěch!";
+            resultText = "Nepodařilo se vám to. Zemřeli jste!";
+            additionalInfo = "Hráč umírá a končí hru.";
+            currentHP = 0;
+            disableButtons();
+            setTimeout(() => {
+                location.href = "index.html";
+            }, 3000);
+        }
 
-            // Update the outcome display
-            document.getElementById("outcome-text").textContent = outcomeText;
-            document.getElementById("choice-text").textContent = `Volba: ${choice.text}`;
-            document.getElementById("result").innerHTML = `
-                <p>D20: ${d20} + ${playerStats[choice.stat]} (Stat) = ${total}</p>
-                <p>${resultText}</p>
-                <p>${additionalInfo}</p>
-            `;
+        document.getElementById("outcome-text").textContent = outcomeText;
+        document.getElementById("choice-text").textContent = `Volba: ${choice.text}`;
+        document.getElementById("result").innerHTML = `
+            <p>D20: ${d20} + ${playerStats[choice.stat]} (Stat) = ${total}</p>
+            <p>${resultText}</p>
+            <p>${additionalInfo}</p>
+        `;
 
-            // Update health display
-            document.getElementById("hp-display").textContent = `Aktuální životy: ${currentHP}`;
+        document.getElementById("hp-display").textContent = `Aktuální životy: ${currentHP}`;
+        localStorage.setItem("hp", currentHP);
 
-            // Save updated health back to localStorage
-            localStorage.setItem("hp", currentHP);
+        if (currentHP <= 0) {
+            disableButtons();
+            setTimeout(() => {
+                location.href = "index.html";
+            }, 3000);
+        }
+    }
 
-            // Inventory functions
-            function getInventory() {
-                return JSON.parse(localStorage.getItem("inventory")) || [];
-            }
+    function disableButtons() {
+        const buttons = document.querySelectorAll("button");
+        buttons.forEach(btn => btn.disabled = true);
+    }
 
-            function saveInventory(inventory) {
-                localStorage.setItem("inventory", JSON.stringify(inventory));
-            }
+    // inventory 
+    function getInventory() {
+        return JSON.parse(localStorage.getItem("inventory")) || [];
+    }
 
-            function addItemToInventory(item) {
-                const inventory = getInventory();
-                inventory.push(item);
-                saveInventory(inventory);
-                updateInventoryDisplay();
-            }
+    function saveInventory(inventory) {
+        localStorage.setItem("inventory", JSON.stringify(inventory));
+    }
 
-            function updateInventoryDisplay() {
-                const inventoryList = document.getElementById("inventory-list");
-                if (!inventoryList) return;
+    function addItemToInventory(item) {
+        const inventory = getInventory();
+        inventory.push(item);
+        saveInventory(inventory);
+        updateInventoryDisplay();
+    }
 
-                const inventory = getInventory();
-                inventoryList.innerHTML = "";
+    function updateInventoryDisplay() {
+        const inventoryList = document.getElementById("inventory-list");
+        if (!inventoryList) return;
 
-                if (inventory.length === 0) {
-                    inventoryList.innerHTML = "<li>Prázdný</li>";
-                    return;
-                }
+        const inventory = getInventory();
+        inventoryList.innerHTML = inventory.length === 0 ? "<li>Prázdný</li>" : '';
+        inventory.forEach(item => {
+            const li = document.createElement("li");
+            li.textContent = item;
+            inventoryList.appendChild(li);
+        });
+    }
 
-                inventory.forEach(item => {
-                    const li = document.createElement("li");
-                    li.textContent = item;
-                    inventoryList.appendChild(li);
-                });
-            }
+    function getRandomItem() {
+        const items = [
+            "Léčivý lektvar",
+            "Kouzelný kámen",
+            "Zrezivělý klíč",
+            "Stříbrná dýka",
+            "Amulet štěstí",
+            "Neviditelný plášť",
+            "Starý svitek",
+            "Tajemný krystal"
+        ];
+        const index = Math.floor(Math.random() * items.length);
+        return items[index];
+    }
+    
 
-            // Clear stored values after outcome
-            localStorage.removeItem("choice");
-            localStorage.removeItem("stat");
-            localStorage.removeItem("result");
+    updateInventoryDisplay();
 
-            // Back button logic
-            document.getElementById("back-button").onclick = function () {
-                // Return to the encounter page
-                location.href = "encounter.html";
-            };
+    // back and menu buttons
+    const backButton = document.getElementById("back-button");
+    if (backButton) {
+        backButton.onclick = function () {
+            window.location.href = "encounter.html";
         };
-    });
+    }
 
-    // Optional: Menu button
-    document.getElementById("menu-button").onclick = function () {
-        window.location.href = "index.html";
-    };
+    const menuButton = document.getElementById("menu-button");
+    if (menuButton) {
+        menuButton.onclick = function () {
+            window.location.href = "index.html";
+        };
+    }
 });
