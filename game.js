@@ -35,6 +35,8 @@ document.addEventListener("DOMContentLoaded", function () {
             class: className
         }));
         localStorage.setItem("hp", stats.hp);
+        localStorage.setItem("xp", 0);  // Initial XP set to 0
+        localStorage.setItem("level", 1);  // Initial level set to 1
         localStorage.setItem("inventory", JSON.stringify([]));
         window.location.href = 'encounter.html';
     }
@@ -74,6 +76,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const playerStats = JSON.parse(localStorage.getItem("playerStats") || '{}');
     let currentHP = parseInt(localStorage.getItem("hp") || "0");
+    let xp = parseInt(localStorage.getItem("xp") || "0");
+    let level = parseInt(localStorage.getItem("level") || "1");
 
     if (!playerStats || !playerStats.str) {
         window.location.href = "index.html"; // fault system if no stats
@@ -85,23 +89,28 @@ document.addEventListener("DOMContentLoaded", function () {
     const dexStat = document.getElementById("dex-stat");
     const intStat = document.getElementById("int-stat");
     const hpStat = document.getElementById("hp-stat");
+    const levelStat = document.getElementById("level-stat");
 
     if (strStat) strStat.textContent = playerStats.str;
     if (dexStat) dexStat.textContent = playerStats.dex;
     if (intStat) intStat.textContent = playerStats.int;
     if (hpStat) hpStat.textContent = currentHP;
+    if (levelStat) levelStat.textContent = `Level: ${level}`;
 
     // randomly select a problem based on difficulty
-    const totalDifficulty = problems.reduce((sum, p) => sum + p.difficulty, 0);
-    let randomValue = Math.random() * totalDifficulty;
-    let selectedProblem = null;
-    for (let problem of problems) {
-        randomValue -= problem.difficulty;
-        if (randomValue <= 0) {
-            selectedProblem = problem;
-            break;
+    function getRandomProblem() {
+        const totalDifficulty = problems.reduce((sum, p) => sum + p.difficulty, 0);
+        let randomValue = Math.random() * totalDifficulty;
+        for (let problem of problems) {
+            randomValue -= problem.difficulty;
+            if (randomValue <= 0) {
+                return problem;
+            }
         }
+        return problems[0]; // fallback in case of unexpected issues
     }
+
+    const selectedProblem = getRandomProblem();
 
     if (selectedProblem) {
         document.getElementById("problem-text").textContent = selectedProblem.text;
@@ -129,20 +138,24 @@ document.addEventListener("DOMContentLoaded", function () {
         let outcomeText = '';
         let resultText = '';
         let additionalInfo = '';
+        let xpGained = 0;
 
         if (total >= 18) {
             outcomeText = "Perfektní úspěch!";
             resultText = "Získali jste předmět a postupujete dál.";
             const newItem = getRandomItem(); 
             addItemToInventory(newItem);     
+            xpGained = 10; 
         } else if (total >= 15) {
             outcomeText = "Úspěch!";
             resultText = "Pokročili jste dál.";
+            xpGained = 5;
         } else if (total >= 4) {
             outcomeText = "Úspěch, ale s následky.";
             resultText = "Vezmete poškození.";
             additionalInfo = "Poškození: 5 HP.";
             currentHP -= 5;
+            xpGained = 2; 
         } else {
             outcomeText = "Neúspěch!";
             resultText = "Nepodařilo se vám to. Zemřeli jste!";
@@ -154,12 +167,18 @@ document.addEventListener("DOMContentLoaded", function () {
             }, 3000);
         }
 
+        xp += xpGained;
+        localStorage.setItem("xp", xp);
+        levelUp();
+        updateStatsDisplay();
+
         document.getElementById("outcome-text").textContent = outcomeText;
         document.getElementById("choice-text").textContent = `Volba: ${choice.text}`;
         document.getElementById("result").innerHTML = `
             <p>D20: ${d20} + ${playerStats[choice.stat]} (Stat) = ${total}</p>
             <p>${resultText}</p>
             <p>${additionalInfo}</p>
+            <p>Získáno XP: ${xpGained}</p>
         `;
 
         document.getElementById("hp-display").textContent = `Aktuální životy: ${currentHP}`;
@@ -177,6 +196,34 @@ document.addEventListener("DOMContentLoaded", function () {
         const buttons = document.querySelectorAll("button");
         buttons.forEach(btn => btn.disabled = true);
     }
+
+    // level up system
+
+    function levelUp() {
+        let IncreaseXPThreshold = 10;  // XP needed to level up
+        IncreaseXPThreshold = IncreaseXPThreshold + 10;  // increase XP threshold (this line might be redundant)
+        const xpThreshold = level * 50;  // simple XP threshold system (50 XP per level)
+        
+        if (xp >= xpThreshold) {
+            level++;
+            localStorage.setItem("level", level);
+            localStorage.setItem("xp", 0);  // reset XP after level up
+            alert(`Level up! jsi niní lvl ${level}!`);
+            
+            // increase stats upon leveling up (optional)
+            const playerStats = JSON.parse(localStorage.getItem("playerStats"));
+            playerStats.hp += 5;  // increase HP by 5 per level (for example)
+            localStorage.setItem("playerStats", JSON.stringify(playerStats));
+        }
+    }
+
+    function updateStatsDisplay() {
+        const levelStat = document.getElementById("level-stat");
+        const hpStat = document.getElementById("hp-display");
+        if (levelStat) levelStat.textContent = `Level: ${level}`;
+        if (hpStat) hpStat.textContent = `Aktuální životy: ${currentHP}`;
+    }
+    
 
     // inventory 
     function getInventory() {
@@ -221,7 +268,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const index = Math.floor(Math.random() * items.length);
         return items[index];
     }
-    
 
     updateInventoryDisplay();
 
