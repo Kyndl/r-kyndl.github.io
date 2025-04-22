@@ -76,7 +76,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let currentHP = parseInt(localStorage.getItem("hp") || "0");
 
     if (!playerStats || !playerStats.str) {
-        window.location.href = "index.html"; // fallback pokud chybí data
+        window.location.href = "index.html"; // fault system if no stats
         return;
     }
 
@@ -133,8 +133,8 @@ document.addEventListener("DOMContentLoaded", function () {
         if (total >= 18) {
             outcomeText = "Perfektní úspěch!";
             resultText = "Získali jste předmět a postupujete dál.";
-            const newItem = getRandomItem(); // <-- nový řádek
-            addItemToInventory(newItem);     // <-- místo pevného "Tajemný artefakt"
+            const newItem = getRandomItem(); 
+            addItemToInventory(newItem);     
         } else if (total >= 15) {
             outcomeText = "Úspěch!";
             resultText = "Pokročili jste dál.";
