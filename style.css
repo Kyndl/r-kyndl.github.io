@@ -1,87 +1,124 @@
+:root {
+  --font-main: 'MedievalSharp', cursive;
+
+  --bg: #fdf6e3;
+  --bg-noise: url("http://api.thumbr.it/whitenoise-361x370.png?background=ffffffff&noise=5c5c5c&density=13&opacity=62");
+  --box-bg: #fff;
+  --box-border: #000;
+  --box-shadow: rgba(0, 0, 0, 0.1);
+  --stats-bg: #f0f0f0;
+  --map-border: #888;
+  --map-bg: #eee;
+  --button-bg: #ddd;
+  --button-hover: #ccc;
+  --panel-bg: #f9f9f9;
+  --panel-border: #aaa;
+  --inventory-border: #ccc;
+  --text-color: #000;
+}
+
+body.dark {
+  --bg: #1a1a1a;
+  --bg-noise: none;
+  --box-bg: #2c2c2c;
+  --box-border: #444;
+  --box-shadow: rgba(0, 0, 0, 0.5);
+  --stats-bg: #333;
+  --map-border: #666;
+  --map-bg: #444;
+  --button-bg: #444;
+  --button-hover: #555;
+  --panel-bg: #2a2a2a;
+  --panel-border: #555;
+  --inventory-border: #555;
+  --text-color: #eee;
+}
+
 body {
-    font-family: 'MedievalSharp', cursive;
-    margin: 0;
-    padding: 0;
-    background-color: #fdf6e3;
-    background-image : url("http://api.thumbr.it/whitenoise-361x370.png?background=ffffffff&noise=5c5c5c&density=13&opacity=62");
-  }
-  
-  #main-container {
-    display: grid;
-    grid-template-columns: 1fr 2fr 1fr;
-    gap: 20px;
-    padding: 20px;
-    box-sizing: border-box;
-  }
-  
-  #left-column, #middle-column, #right-column {
-    background-color: white;
-    border: 2px solid #000;
-    border-radius: 8px;
-    padding: 16px;
-    box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
-  }
-  .stats-box {
-    background-color: #f0f0f0;
-    padding: 10px;
-    border-radius: 4px;
-    margin-bottom: 10px;
-    height: 40%;
-    overflow-y: auto;
-    box-shadow: 0 0 5px rgba(0,0,0,0.2);
-  }
-  
-  h1, h2, h3 {
-    margin-top: 0;
-  }
-  
-  #map {
-    width: 100%;
-    height: 200px;
-    border: 2px dashed #888;
-    background-color: #eee;
-    background-image: url("map.png");
-    background-size: cover; /* or set exact size, like '100% 100%' */
-    background-position: center;
-    background-repeat: no-repeat;
-  }
-  
-  
-  button {
-    font-family: inherit;
-    padding: 10px;
-    margin: 5px 0;
-    width: 100%;
-    background-color: #ddd;
-    border: 1px solid #333;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  button:hover {
-    background-color: #ccc;
-  }
-  
-  #encounter-result, #bottom-bar {
-    margin-top: 20px;
-    background-color: #f9f9f9;
-    padding: 10px;
-    border: 1px solid #aaa;
-    border-radius: 4px;
-  }
-  
-  #inventory ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-  #inventory li {
-    border-bottom: 1px solid #ccc;
-    padding: 4px 0;
-  }
-  
-  #hp-display, #result, #outcome-text, #choice-text {
-    margin-top: 8px;
-  }
-  
+  font-family: var(--font-main);
+  background-color: var(--bg);
+  background-image: var(--bg-noise);
+  margin: 0;
+  padding: 0;
+  color: var(--text-color);
+}
+
+#main-container {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 20px;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+#left-column, #middle-column, #right-column {
+  background: var(--box-bg);
+  border: 2px solid var(--box-border);
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 2px 2px 6px var(--box-shadow);
+}
+
+.stats-box {
+  background: var(--stats-bg);
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  height: 40%;
+  overflow-y: auto;
+  box-shadow: 0 0 5px var(--box-shadow);
+}
+
+h1, h2, h3 {
+  margin-top: 0;
+}
+
+#map {
+  width: 100%;
+  height: 200px;
+  border: 2px dashed var(--map-border);
+  background-color: var(--map-bg);
+  background-image: url("map.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+button {
+  font-family: inherit;
+  padding: 10px;
+  margin: 5px 0;
+  width: 100%;
+  background: var(--button-bg);
+  border: 1px solid var(--box-border);
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-color);
+}
+
+button:hover {
+  background: var(--button-hover);
+}
+
+#encounter-result, #bottom-bar {
+  margin-top: 20px;
+  background: var(--panel-bg);
+  padding: 10px;
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+}
+
+#inventory ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#inventory li {
+  border-bottom: 1px solid var(--inventory-border);
+  padding: 4px 0;
+}
+
+#hp-display, #result, #outcome-text, #choice-text {
+  margin-top: 8px;
+}

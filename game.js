@@ -13,17 +13,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const chooseMage = document.getElementById("chooseMage");
 
     if (chooseWarrior && chooseRogue && chooseMage) {
-        chooseWarrior.addEventListener("click", function () {
-            chooseClass("warrior");
-        });
-
-        chooseRogue.addEventListener("click", function () {
-            chooseClass("rogue");
-        });
-
-        chooseMage.addEventListener("click", function () {
-            chooseClass("mage");
-        });
+        chooseWarrior.addEventListener("click", () => chooseClass("warrior"));
+        chooseRogue.addEventListener("click", () => chooseClass("rogue"));
+        chooseMage.addEventListener("click", () => chooseClass("mage"));
     }
 
     function chooseClass(className) {
@@ -35,8 +27,8 @@ document.addEventListener("DOMContentLoaded", function () {
             class: className
         }));
         localStorage.setItem("hp", stats.hp);
-        localStorage.setItem("xp", 0);  // Initial XP set to 0
-        localStorage.setItem("level", 1);  // Initial level set to 1
+        localStorage.setItem("xp", 0);
+        localStorage.setItem("level", 1);
         localStorage.setItem("inventory", JSON.stringify([]));
         window.location.href = 'encounter.html';
     }
@@ -74,30 +66,32 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     ];
 
-    const playerStats = JSON.parse(localStorage.getItem("playerStats") || '{}');
+    let playerStats = JSON.parse(localStorage.getItem("playerStats") || '{}');
     let currentHP = parseInt(localStorage.getItem("hp") || "0");
     let xp = parseInt(localStorage.getItem("xp") || "0");
     let level = parseInt(localStorage.getItem("level") || "1");
 
     if (!playerStats || !playerStats.str) {
-        window.location.href = "index.html"; // fault system if no stats
+        window.location.href = "index.html";
         return;
     }
 
-    // show player stats
     const strStat = document.getElementById("str-stat");
     const dexStat = document.getElementById("dex-stat");
     const intStat = document.getElementById("int-stat");
     const hpStat = document.getElementById("hp-stat");
     const levelStat = document.getElementById("level-stat");
 
-    if (strStat) strStat.textContent = playerStats.str;
-    if (dexStat) dexStat.textContent = playerStats.dex;
-    if (intStat) intStat.textContent = playerStats.int;
-    if (hpStat) hpStat.textContent = currentHP;
-    if (levelStat) levelStat.textContent = `Level: ${level}`;
+    function updateStatsDisplay() {
+        if (strStat) strStat.textContent = playerStats.str;
+        if (dexStat) dexStat.textContent = playerStats.dex;
+        if (intStat) intStat.textContent = playerStats.int;
+        if (hpStat) hpStat.textContent = currentHP;
+        if (levelStat) levelStat.textContent = `Level: ${level}`;
+    }
 
-    // randomly select a problem based on difficulty
+    updateStatsDisplay();
+
     function getRandomProblem() {
         const totalDifficulty = problems.reduce((sum, p) => sum + p.difficulty, 0);
         let randomValue = Math.random() * totalDifficulty;
@@ -107,26 +101,37 @@ document.addEventListener("DOMContentLoaded", function () {
                 return problem;
             }
         }
-        return problems[0]; // fallback in case of unexpected issues
+        return problems[0];
     }
 
-    const selectedProblem = getRandomProblem();
+    let selectedProblem = getRandomProblem();
+    displayProblem(selectedProblem);
 
-    if (selectedProblem) {
-        document.getElementById("problem-text").textContent = selectedProblem.text;
-        const buttons = [document.getElementById("choice1"), document.getElementById("choice2"), document.getElementById("choice3")];
-        selectedProblem.choices.forEach((choice, index) => {
+    function displayProblem(problem) {
+        if (!problem) return;
+        document.getElementById("problem-text").textContent = problem.text;
+        const buttons = [
+            document.getElementById("choice1"),
+            document.getElementById("choice2"),
+            document.getElementById("choice3")
+        ];
+        problem.choices.forEach((choice, index) => {
             const btn = buttons[index];
-            btn.textContent = choice.text;
-            btn.onclick = function () {
-                handleChoice(choice);
-            };
+            if (btn) {
+                btn.textContent = choice.text;
+                btn.onclick = () => handleChoice(choice);
+            }
         });
     }
 
-    // result display
     function handleChoice(choice) {
-        if (currentHP <= 0) return;
+        if (currentHP <= 0) {
+            disableButtons();
+            setTimeout(() => {
+                location.href = "index.html";
+            }, 3000);
+            return;
+        }
 
         const d20 = Math.floor(Math.random() * 20) + 1;
         const total = d20 + playerStats[choice.stat];
@@ -143,9 +148,9 @@ document.addEventListener("DOMContentLoaded", function () {
         if (total >= 18) {
             outcomeText = "Perfektní úspěch!";
             resultText = "Získali jste předmět a postupujete dál.";
-            const newItem = getRandomItem(); 
-            addItemToInventory(newItem);     
-            xpGained = 10; 
+            const newItem = getRandomItem();
+            addItemToInventory(newItem);
+            xpGained = 10;
         } else if (total >= 15) {
             outcomeText = "Úspěch!";
             resultText = "Pokročili jste dál.";
@@ -155,7 +160,7 @@ document.addEventListener("DOMContentLoaded", function () {
             resultText = "Vezmete poškození.";
             additionalInfo = "Poškození: 5 HP.";
             currentHP -= 5;
-            xpGained = 2; 
+            xpGained = 2;
         } else {
             outcomeText = "Neúspěch!";
             resultText = "Nepodařilo se vám to. Zemřeli jste!";
@@ -169,6 +174,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         xp += xpGained;
         localStorage.setItem("xp", xp);
+        localStorage.setItem("hp", currentHP);
         levelUp();
         updateStatsDisplay();
 
@@ -182,13 +188,10 @@ document.addEventListener("DOMContentLoaded", function () {
         `;
 
         document.getElementById("hp-display").textContent = `Aktuální životy: ${currentHP}`;
-        localStorage.setItem("hp", currentHP);
 
-        if (currentHP <= 0) {
-            disableButtons();
-            setTimeout(() => {
-                location.href = "index.html";
-            }, 3000);
+        if (currentHP > 0) {
+            selectedProblem = getRandomProblem();
+            displayProblem(selectedProblem);
         }
     }
 
@@ -197,35 +200,24 @@ document.addEventListener("DOMContentLoaded", function () {
         buttons.forEach(btn => btn.disabled = true);
     }
 
-    // level up system
-
     function levelUp() {
-        let IncreaseXPThreshold = 10;  // XP needed to level up
-        IncreaseXPThreshold = IncreaseXPThreshold + 10;  // increase XP threshold (this line might be redundant)
-        const xpThreshold = level * 50;  // simple XP threshold system (50 XP per level)
-        
+        const xpThreshold = level * 50;
         if (xp >= xpThreshold) {
             level++;
+            xp = 0;
             localStorage.setItem("level", level);
-            localStorage.setItem("xp", 0);  // reset XP after level up
-            alert(`Level up! jsi niní lvl ${level}!`);
-            
-            // increase stats upon leveling up (optional)
-            const playerStats = JSON.parse(localStorage.getItem("playerStats"));
-            playerStats.hp += 5;  // increase HP by 5 per level (for example)
-            localStorage.setItem("playerStats", JSON.stringify(playerStats));
+            localStorage.setItem("xp", xp);
+            alert(`Level up! Jsi nyní lvl ${level}!`);
+            const playerStatsRaw = JSON.parse(localStorage.getItem("playerStats"));
+            playerStatsRaw.str += 1;
+            playerStatsRaw.dex += 1;
+            playerStatsRaw.int += 1;
+            localStorage.setItem("playerStats", JSON.stringify(playerStatsRaw));
+            playerStats = playerStatsRaw;
         }
     }
 
-    function updateStatsDisplay() {
-        const levelStat = document.getElementById("level-stat");
-        const hpStat = document.getElementById("hp-display");
-        if (levelStat) levelStat.textContent = `Level: ${level}`;
-        if (hpStat) hpStat.textContent = `Aktuální životy: ${currentHP}`;
-    }
-    
-
-    // inventory 
+    // === INVENTORY SYSTEM ===
     function getInventory() {
         return JSON.parse(localStorage.getItem("inventory")) || [];
     }
@@ -271,18 +263,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
     updateInventoryDisplay();
 
-    // back and menu buttons
+    // === BACK AND MENU BUTTONS ===
     const backButton = document.getElementById("back-button");
     if (backButton) {
-        backButton.onclick = function () {
-            window.location.href = "encounter.html";
-        };
+        backButton.onclick = () => window.location.href = "encounter.html";
     }
 
     const menuButton = document.getElementById("menu-button");
     if (menuButton) {
-        menuButton.onclick = function () {
-            window.location.href = "index.html";
-        };
+        menuButton.onclick = () => window.location.href = "index.html";
     }
 });
+
+
+// theme changer
+    if (localStorage.getItem('theme') === 'dark') {
+        document.body.classList.add('dark');
+      }
+  
+      function toggleTheme() {
+        document.body.classList.toggle('dark');
+        localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+      }

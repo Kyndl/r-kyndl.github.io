@@ -5,9 +5,41 @@
   <title>Quest Start</title>
   <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  <script src="game.js" defer></script>
+  <script src="game.js" defer> </script>
+  <style>
+    .theme-toggle {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: none;
+      border: 2px solid var(--box-border);
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: var(--button-bg);
+      color: var(--text-color);
+    }
+
+    .scroll {
+      max-width: 600px;
+      margin: 100px auto;
+      padding: 20px;
+      background-color: var(--box-bg);
+      border: 2px solid var(--box-border);
+      border-radius: 8px;
+      box-shadow: 2px 2px 6px var(--box-shadow);
+      color: var(--text-color);
+    }
+
+    .choices button {
+      margin: 5px;
+    }
+  </style>
 </head>
 <body>
+  <button class="theme-toggle" onclick="toggleTheme()">🌙 / ☀️</button>
+
   <div class="scroll">
     <h1>Vítej v dobrodružství!</h1>
     <p>Jsi hrdina, který se vydává na nebezpečnou cestu. Tvé rozhodnutí určí osud tvého dobrodružství.</p>
