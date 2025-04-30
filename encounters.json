@@ -1,0 +1,31 @@
+
+    [
+        {
+            "text": "Před vámi je zborcený most. Musíte ho přeskočit nebo obejít.",
+            "difficulty": 1,
+            "choices": [
+                { "text": "Přeskočit (Síla)", "stat": "str" },
+                { "text": "Obejít (Houževnatost)", "stat": "dex" },
+                { "text": "Najít jinou cestu (Inteligence)", "stat": "int" }
+            ]
+        },
+        {
+            "text": "Stojíš před magickým zámkem, který blokuje dveře.",
+            "difficulty": 2,
+            "choices": [
+                { "text": "Rozrazit dveře (Síla)", "stat": "str" },
+                { "text": "Obejít mechanismus (Houževnatost)", "stat": "dex" },
+                { "text": "Rozluštit kouzlo (Inteligence)", "stat": "int" }
+            ]
+        },
+        {
+            "text": "Byl jsi přepaden v temném lese.",
+            "difficulty": 3,
+            "choices": [
+                { "text": "Bojuj (Síla)", "stat": "str" },
+                { "text": "Utíkej (Houževnatost)", "stat": "dex" },
+                { "text": "Oklam je (Inteligence)", "stat": "int" }
+            ]
+        }
+        
+    ]
