@@ -122,3 +122,32 @@ button:hover {
 #hp-display, #result, #outcome-text, #choice-text {
   margin-top: 8px;
 }
+
+.theme-toggle {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: 2px solid var(--box-border);
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: var(--button-bg);
+  color: var(--text-color);
+}
+
+.scroll {
+  max-width: 600px;
+  margin: 100px auto;
+  padding: 20px;
+  background-color: var(--box-bg);
+  border: 2px solid var(--box-border);
+  border-radius: 8px;
+  box-shadow: 2px 2px 6px var(--box-shadow);
+  color: var(--text-color);
+}
+
+.choices button {
+  margin: 5px;
+}
