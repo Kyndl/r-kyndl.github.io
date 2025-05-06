@@ -340,16 +340,6 @@ fetch('items.json')
         .catch(error => {
             console.error('Error fetching encounters:', error);
         });
-
-    // === THEME TOGGLER ===
-    if (localStorage.getItem('theme') === 'dark') {
-        document.body.classList.add('dark');
-    }
-
-    window.toggleTheme = function () {
-        document.body.classList.toggle('dark');
-        localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
-    };
 });
 
 
@@ -359,7 +349,7 @@ fetch('items.json')
     // ==================
 
 
-    fetch('https://api.github.com/repos/USERNAME/REPO/commits')
+    fetch('https://api.github.com/repos/Kyndl/r-kyndl.github.io/commits')
         .then(res => res.json())
         .then(data => {
         const list = document.getElementById('changelog');
