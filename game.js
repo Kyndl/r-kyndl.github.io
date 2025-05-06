@@ -351,3 +351,36 @@ fetch('items.json')
         localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
     };
 });
+
+
+
+    // ==================
+    // === CHANGELOG ====
+    // ==================
+
+
+    fetch('https://api.github.com/repos/USERNAME/REPO/commits')
+        .then(res => res.json())
+        .then(data => {
+        const list = document.getElementById('changelog');
+        data.slice(0, 5).forEach(commit => {
+      const li = document.createElement('li');
+      li.textContent = `${commit.commit.message} by ${commit.commit.author.name}`;
+      list.appendChild(li);
+    });
+    });
+
+
+    // window.onload = function () {
+    //     const saved = localStorage.getItem('characterData');
+    //     if (saved) {
+    //       const data = JSON.parse(saved);
+    //   
+    //       // Apply to your DOM elements however needed
+    //       changeHairStyle(data.hairStyle);
+    //       changeBody(data.bodyStyle);
+    //       changeSkinColor(data.skinColor);
+    //       changeEyeColor(data.eyeColor);
+    //       changeLegStyle(data.legStyle);
+    //     }
+    //   };

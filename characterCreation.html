@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="characterCreation.css" />
+  <title>Tvorba postavy</title>
+</head>
+<body>
+  <h1>Tvorba postavy</h1>
+
+  <div id="character">
+    <div class="head" id="head">
+      <div class="hair short" id="hair"></div>
+      <div class="eye left" id="eye-left"></div>
+      <div class="eye right" id="eye-right"></div>
+    </div>
+    <div class="bodyC short" id="body"></div>
+    <div class="legs" id="legs">
+      <div class="leg" id="left-leg"></div>
+      <div class="leg" id="right-leg"></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <label for="hairstyle">Vlasy:</label>
+    <select id="hairstyle" onchange="changeHairStyle(this.value)">
+      <option value="short">krátké</option>
+      <option value="long">dlouhé</option>
+      <option value="spiky">špičaté</option>
+    </select>
+
+    <label for="body">Tělo:</label>
+    <select id="body" onchange="changeBody(this.value)">
+      <option value="short">kratký</option>
+      <option value="tall">vysoký</option>
+      <option value="muscular">svalnatý</option>
+      <option value="fat">tlustý</option>
+    </select>
+
+    <label for="skin">Barva kůže:</label>
+    <select id="skin" onchange="changeSkinColor(this.value)">
+      <option value="#fcd5b4">světlá</option>
+      <option value="#c68642">opalená</option>
+      <option value="#8d5524">černá</option>
+    </select>
+    
+    <label for="eye">Barva očí:</label>
+    <select id="eye" onchange="changeEyeColor(this.value)">
+      <option value="#000000">černá</option>
+      <option value="#0000FF">modrá</option>
+      <option value="#008000">zelená</option>
+      <option value="#FF0000">červená</option>
+      <option value="#FFFF00">žlutá</option>
+    </select>
+
+    <label for="leg">Nohy:</label>
+    <select id="leg" onchange="changeLegStyle(this.value)">
+      <option value="short">krátké</option>
+      <option value="long">dlouhé</option>
+      <option value="muscular">svalnaté</option>
+      <option value="fat">tlusté</option>
+    </select>
+  </div>
+  <button onclick="saveCharacter()">Uložit postavu</button>
+
+
+  <script>
+    function changeHairStyle(style) {
+      const hair = document.getElementById('hair');
+      hair.className = 'hair ' + style;
+    }
+
+    function changeSkinColor(color) {
+      const head = document.getElementById('head');
+      head.style.backgroundColor = color;
+    }
+
+    function changeBody(style) {
+      const body = document.getElementById('body');
+      body.className = 'bodyC ' + style;
+    }
+
+    function changeEyeColor(color) {
+      document.getElementById('eye-left').style.backgroundColor = color;
+      document.getElementById('eye-right').style.backgroundColor = color;
+    }
+
+    function changeLegStyle(style) {
+      const leftLeg = document.getElementById('left-leg');
+      const rightLeg = document.getElementById('right-leg');
+      leftLeg.className = 'leg ' + style;
+      rightLeg.className = 'leg ' + style;
+    }
+
+    function saveCharacter() {
+  const characterData = {
+    hairStyle: document.getElementById('hairstyle').value,
+    bodyStyle: document.getElementById('body').value,
+    skinColor: document.getElementById('head').style.backgroundColor,
+    eyeColor: document.getElementById('eye-left').style.backgroundColor,
+    legStyle: document.getElementById('leg').value,
+  };
+
+  localStorage.setItem('characterData', JSON.stringify(characterData));
+  alert('Postava byla uložena!');
+}
+
+  </script>
+</body>
+</html>
