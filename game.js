@@ -27,6 +27,7 @@ document.addEventListener("DOMContentLoaded", function () {
             class: className
         }));
         localStorage.setItem("hp", stats.hp);
+        localStorage.setItem("maxhp", stat.hp)
         localStorage.setItem("xp", 0);
         localStorage.setItem("level", 1);
         localStorage.setItem("inventory", JSON.stringify([]));
@@ -294,17 +295,27 @@ fetch('items.json')
 
     function useItem(item) {
         if (item.type === "heal") {
-            currentHP += item.value;
-            localStorage.setItem("hp", currentHP);
+            const maxHP = getMaxHP();
+            currentHP = Math.min(currentHP + item.value, maxHP);
         } else if (item.type === "buff") {
-            playerStats[item.stat] += item.value;
+            // Ensure the stat exists
+            if (playerStats.hasOwnProperty(item.stat)) {
+                playerStats[item.stat] += item.value;
+            } else {
+                console.warn(`Unknown stat: ${item.stat}`);
+                return;
+            }
             localStorage.setItem("playerStats", JSON.stringify(playerStats));
+        } else {
+            console.warn(`Unknown item type: ${item.type}`);
+            return;
         }
     
         alert(`Používáš: ${item.name}!`);
         updateStatsDisplay();
         updateInventoryDisplay();
     }
+    
     
     
 
