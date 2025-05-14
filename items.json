@@ -1,0 +1,9 @@
+[
+    { "name": "Léčivý lektvar", "rarity": "common", "type": "heal", "value": 10 },
+    { "name": "Lektvar síly", "rarity": "common", "type":  "buff", "stat": "str", "value": 1  },
+    { "name": "Kouzelný kámen", "rarity": "uncommon", "type": "buff", "stat": "int", "value": 2 },
+    { "name": "Neviditelný plášť", "rarity": "rare", "type": "buff", "stat": "dex", "value": 3 },
+    { "name": "Legendární prsten", "rarity": "epic", "type": "heal", "value": 30 },
+    { "name": "Stříbrná dýka", "rarity": "uncommon", "type": "item" },
+    { "name": "Plášť hvězd", "rarity": "epic", "type": "buff", "stat": "str", "value": 5 }
+]

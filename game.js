@@ -27,6 +27,7 @@ document.addEventListener("DOMContentLoaded", function () {
             class: className
         }));
         localStorage.setItem("hp", stats.hp);
+        localStorage.setItem("maxhp", stat.hp)
         localStorage.setItem("xp", 0);
         localStorage.setItem("level", 1);
         localStorage.setItem("inventory", JSON.stringify([]));
@@ -36,35 +37,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // ===============================
     // ====== ENCOUNTER SECTION ======
     // ===============================
-    const problems = [
-        {
-            text: "Před vámi je zborcený most. Musíte ho přeskočit nebo obejít.",
-            difficulty: 1,
-            choices: [
-                { text: "Přeskočit (Síla)", stat: "str" },
-                { text: "Obe jít (Houževnatost)", stat: "dex" },
-                { text: "Najít jinou cestu (Inteligence)", stat: "int" }
-            ]
-        },
-        {
-            text: "Stojíš před magickým zámkem, který blokuje dveře.",
-            difficulty: 2,
-            choices: [
-                { text: "Rozrazit dveře (Síla)", stat: "str" },
-                { text: "Obejít mechanismus (Houževnatost)", stat: "dex" },
-                { text: "Rozluštit kouzlo (Inteligence)", stat: "int" }
-            ]
-        },
-        {
-            text: "Byl jsi přepaden v temném lese.",
-            difficulty: 3,
-            choices: [
-                { text: "Bojuj (Síla)", stat: "str" },
-                { text: "Utíkej (Houževnatost)", stat: "dex" },
-                { text: "Oklam je (Inteligence)", stat: "int" }
-            ]
-        }
-    ];
+    let problems = [];
 
     let playerStats = JSON.parse(localStorage.getItem("playerStats") || '{}');
     let currentHP = parseInt(localStorage.getItem("hp") || "0");
@@ -92,24 +65,28 @@ document.addEventListener("DOMContentLoaded", function () {
 
     updateStatsDisplay();
 
-    function getRandomProblem() {
-        const totalDifficulty = problems.reduce((sum, p) => sum + p.difficulty, 0);
-        let randomValue = Math.random() * totalDifficulty;
-        for (let problem of problems) {
-            randomValue -= problem.difficulty;
+    function getRandomProblem(problems, level) {
+        const weightedProblems = problems.map(p => {
+            const distance = Math.abs(p.difficulty - level);
+            const weight = 1 / (1 + distance);
+            return { ...p, weight };
+        });
+
+        const totalWeight = weightedProblems.reduce((sum, p) => sum + p.weight, 0);
+        let randomValue = Math.random() * totalWeight;
+
+        for (let problem of weightedProblems) {
+            randomValue -= problem.weight;
             if (randomValue <= 0) {
                 return problem;
             }
         }
-        return problems[0];
+        return weightedProblems[0]; // fallback
     }
-
-    let selectedProblem = getRandomProblem();
-    displayProblem(selectedProblem);
 
     function displayProblem(problem) {
         if (!problem) return;
-        document.getElementById("problem-text").textContent = problem.text;
+        document.getElementById("problem-text").textContent = `${problem.text} (Obtížnost: ${problem.difficulty})`;
         const buttons = [
             document.getElementById("choice1"),
             document.getElementById("choice2"),
@@ -145,17 +122,22 @@ document.addEventListener("DOMContentLoaded", function () {
         let additionalInfo = '';
         let xpGained = 0;
 
-        if (total >= 18) {
+        const difficulty = selectedProblem.difficulty;
+        const perfectThreshold = 15 + difficulty * 2;
+        const successThreshold = 12 + difficulty * 2;
+        const consequenceThreshold = 6 + difficulty;
+
+        if (total >= perfectThreshold) {
             outcomeText = "Perfektní úspěch!";
             resultText = "Získali jste předmět a postupujete dál.";
             const newItem = getRandomItem();
             addItemToInventory(newItem);
             xpGained = 10;
-        } else if (total >= 15) {
+        } else if (total >= successThreshold) {
             outcomeText = "Úspěch!";
             resultText = "Pokročili jste dál.";
             xpGained = 5;
-        } else if (total >= 4) {
+        } else if (total >= consequenceThreshold) {
             outcomeText = "Úspěch, ale s následky.";
             resultText = "Vezmete poškození.";
             additionalInfo = "Poškození: 5 HP.";
@@ -190,7 +172,7 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("hp-display").textContent = `Aktuální životy: ${currentHP}`;
 
         if (currentHP > 0) {
-            selectedProblem = getRandomProblem();
+            selectedProblem = getRandomProblem(problems, level);
             displayProblem(selectedProblem);
         }
     }
@@ -217,7 +199,9 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    // =========================
     // === INVENTORY SYSTEM ===
+    // =========================
     function getInventory() {
         return JSON.parse(localStorage.getItem("inventory")) || [];
     }
@@ -228,40 +212,121 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function addItemToInventory(item) {
         const inventory = getInventory();
-        inventory.push(item);
+        const itemWithId = { ...item, id: crypto.randomUUID() }; // Unique ID
+        inventory.push(itemWithId);
         saveInventory(inventory);
         updateInventoryDisplay();
     }
+    
 
     function updateInventoryDisplay() {
         const inventoryList = document.getElementById("inventory-list");
         if (!inventoryList) return;
-
+    
         const inventory = getInventory();
         inventoryList.innerHTML = inventory.length === 0 ? "<li>Prázdný</li>" : '';
+    
         inventory.forEach(item => {
             const li = document.createElement("li");
-            li.textContent = item;
+            li.textContent = `${item.name} (${item.rarity})`;
+    
+            if (item.type === "heal" || item.type === "buff") {
+                const btn = document.createElement("button");
+                btn.textContent = "Použít";
+                btn.setAttribute("data-id", item.id); // Attach item ID
+                btn.onclick = () => {
+                    useItem(item);
+                    removeItemById(item.id);
+                };
+                li.appendChild(btn);
+            }
+    
             inventoryList.appendChild(li);
         });
     }
 
-    function getRandomItem() {
-        const items = [
-            "Léčivý lektvar",
-            "Kouzelný kámen",
-            "Zrezivělý klíč",
-            "Stříbrná dýka",
-            "Amulet štěstí",
-            "Neviditelný plášť",
-            "Starý svitek",
-            "Tajemný krystal"
-        ];
-        const index = Math.floor(Math.random() * items.length);
-        return items[index];
+    function removeItemById(id) {
+        let inventory = getInventory();
+        inventory = inventory.filter(item => item.id !== id);
+        saveInventory(inventory);
+        updateInventoryDisplay();
+    }
+    
+    
+    
+
+    let itemPool = [];
+
+fetch('items.json')
+    .then(response => response.json())
+    .then(data => itemPool = data)
+    .catch(err => console.error("Failed to load items:", err));
+
+
+    function getRandomItem(difficulty, level) {
+        if (itemPool.length === 0) return { name: "Neznámý předmět", rarity: "common", type: "item" };
+    
+        function getItemRarityWeights(diff, lvl) {
+            const delta = diff - lvl;
+            return {
+                common: Math.max(10, 50 - delta * 2),
+                uncommon: Math.max(5, 30 + delta * 1),
+                rare: Math.max(0, 15 + delta * 1.5),
+                epic: Math.max(0, 5 + delta * 1)
+            };
+        }
+    
+        function weightedRandom(weights) {
+            const entries = Object.entries(weights);
+            const total = entries.reduce((s, [, w]) => s + w, 0);
+            let rand = Math.random() * total;
+            for (const [rarity, weight] of entries) {
+                if (rand < weight) return rarity;
+                rand -= weight;
+            }
+            return "common";
+        }
+    
+        const weights = getItemRarityWeights(difficulty, level);
+        const selectedRarity = weightedRandom(weights);
+        const filtered = itemPool.filter(i => i.rarity === selectedRarity);
+        return filtered[Math.floor(Math.random() * filtered.length)];
     }
 
+    function useItem(item) {
+        if (item.type === "heal") {
+            const maxHP = getMaxHP();
+            currentHP = Math.min(currentHP + item.value, maxHP);
+        } else if (item.type === "buff") {
+            // Ensure the stat exists
+            if (playerStats.hasOwnProperty(item.stat)) {
+                playerStats[item.stat] += item.value;
+            } else {
+                console.warn(`Unknown stat: ${item.stat}`);
+                return;
+            }
+            localStorage.setItem("playerStats", JSON.stringify(playerStats));
+        } else {
+            console.warn(`Unknown item type: ${item.type}`);
+            return;
+        }
+    
+        alert(`Používáš: ${item.name}!`);
+        updateStatsDisplay();
+        updateInventoryDisplay();
+    }
+    
+    
+    
+
     updateInventoryDisplay();
+
+
+
+    // ==================
+    // === UI SECTION ===
+    // ==================
+
 
     // === BACK AND MENU BUTTONS ===
     const backButton = document.getElementById("back-button");
@@ -273,15 +338,50 @@ document.addEventListener("DOMContentLoaded", function () {
     if (menuButton) {
         menuButton.onclick = () => window.location.href = "index.html";
     }
+
+    // Fetch encounters and display one matching player's level
+    fetch('encounters.json')
+        .then(response => response.json())
+        .then(data => {
+            problems.length = 0;
+            problems.push(...data);
+            selectedProblem = getRandomProblem(problems, level);
+            displayProblem(selectedProblem);
+        })
+        .catch(error => {
+            console.error('Error fetching encounters:', error);
+        });
 });
 
 
-// theme changer
-    if (localStorage.getItem('theme') === 'dark') {
-        document.body.classList.add('dark');
-      }
-  
-      function toggleTheme() {
-        document.body.classList.toggle('dark');
-        localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
-      }
+
+    // ==================
+    // === CHANGELOG ====
+    // ==================
+
+
+    fetch('https://api.github.com/repos/Kyndl/r-kyndl.github.io/commits')
+        .then(res => res.json())
+        .then(data => {
+        const list = document.getElementById('changelog');
+        data.slice(0, 5).forEach(commit => {
+      const li = document.createElement('li');
+      li.textContent = `${commit.commit.message} by ${commit.commit.author.name}`;
+      list.appendChild(li);
+    });
+    });
+
+
+    // window.onload = function () {
+    //     const saved = localStorage.getItem('characterData');
+    //     if (saved) {
+    //       const data = JSON.parse(saved);
+    //   
+    //       // Apply to your DOM elements however needed
+    //       changeHairStyle(data.hairStyle);
+    //       changeBody(data.bodyStyle);
+    //       changeSkinColor(data.skinColor);
+    //       changeEyeColor(data.eyeColor);
+    //       changeLegStyle(data.legStyle);
+    //     }
+    //   };

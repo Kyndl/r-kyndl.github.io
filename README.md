@@ -1,1 +1,5 @@
-# r-kyndl.github.io
+# My DnD inspired text based game.
+## 
+
+
+Author is @Spejle
